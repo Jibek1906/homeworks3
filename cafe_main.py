@@ -3,12 +3,16 @@ import asyncio
 from bot_config import dp, bot
 
 from handlers.start import start_router
-from handlers.myinfo import myinfo_router
+from handlers.greeting import greeting_router
+from handlers.menu import menu_router
+from handlers.description_of_drinks import description_router
 from handlers.random import random_router
 
 async def main():
     dp.include_router(start_router)
-    dp.include_router(myinfo_router)
+    dp.include_router(greeting_router)
+    dp.include_router(menu_router)
+    dp.include_router(description_router)
     dp.include_router(random_router)
     await dp.start_polling(bot)
 
