@@ -13,3 +13,4 @@ async def start(message: types.Message):
         ]
     )
     await message.answer(f"Привет, {message.from_user.first_name}!", reply_markup=kb)
+    print(message.from_user.id)

@@ -2,6 +2,9 @@ from aiogram import Router, F, types
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
+from bot_config import database
+from datetime import datetime
+
 review_dialog_router = Router()
 
 class RestaurantReview(StatesGroup):
@@ -112,13 +115,24 @@ async def process_extra_comments(message: types.Message,state: FSMContext):
         await message.answer("Ваши текст слишком длинный. Пожалуйста, ограничьтесь 500 символами.")
         return
     await state.update_data(extra_comments=message.text)
-    await message.answer("Дата посещения?")
+    await message.answer("Дата посещения?"
+                         "\nВведите дату без пробелов, в формате ДД.ММ.ГГГГ (например, 19.06.2004)")
     await state.set_state(RestaurantReview.date)
 
 @review_dialog_router.message(RestaurantReview.date)
 async def process_date(message: types.Message, state: FSMContext):
-    await state.update_data(date=message.text)
+    date = message.text
+    if " " in date or "\t" in date:
+        await message.answer("Введите дату без пробелов, в формате ДД.ММ.ГГГГ (например, 19.06.2004)")
+        return
+    try:
+        visit_date = datetime.strptime(date, "%d.%m.%Y")
+    except ValueError:
+        await message.answer("Введите дату в формате ДД.ММ.ГГГГ (например, 19.06.2004)")
+        return
+    await state.update_data(date=visit_date.strftime("%d.%m.%Y"))
     await message.answer(f"Спасибо за ваш отзыв, {message.from_user.first_name}")
     data = await state.get_data()
     print(data)
+    database.save_reviews(data)
     await state.clear()
