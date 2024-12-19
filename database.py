@@ -12,7 +12,7 @@ class Database:
                      name TEXT,
                      phone_number TEXT,
                      food_rating INTEGER,
-                     cleanliness_rating TEXT,
+                     cleanliness_rating INTEGER,
                      extra_comments TEXT,
                      date DATE 
                      )

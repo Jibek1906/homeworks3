@@ -68,26 +68,15 @@ async def process_food_rating(callback: types.CallbackQuery, state: FSMContext):
         elif rating >= 4 and rating <= 5:
             await callback.message.answer(
                 f"Вы поставили {callback.data}. Спасибо за положительный отзыв. Будем стараться удерживать данный уровень кухни.")
-        await state.update_data(food_rating=callback.data)
+        await state.update_data(food_rating=rating)
 
-        await state.update_data(food_rating=callback.data)
         cleanliness_rating_kb = types.InlineKeyboardMarkup(
             inline_keyboard=[
-                [
-                    types.InlineKeyboardButton(text='Плохо', callback_data='bad')
-                ],
-                [
-                    types.InlineKeyboardButton(text='Не очень', callback_data='not_good')
-                ],
-                [
-                    types.InlineKeyboardButton(text='Хорошо', callback_data='good')
-                ],
-                [
-                    types.InlineKeyboardButton(text='Прекрасно', callback_data='perfect')
-                ],
-                [
-                    types.InlineKeyboardButton(text='Превосходно', callback_data='amazing')
-                ]
+                [types.InlineKeyboardButton(text='Плохо', callback_data='bad')],
+                [types.InlineKeyboardButton(text='Не очень', callback_data='not_good')],
+                [types.InlineKeyboardButton(text='Хорошо', callback_data='good')],
+                [types.InlineKeyboardButton(text='Прекрасно', callback_data='perfect')],
+                [types.InlineKeyboardButton(text='Превосходно', callback_data='amazing')]
             ]
         )
         await callback.answer()
@@ -96,17 +85,29 @@ async def process_food_rating(callback: types.CallbackQuery, state: FSMContext):
 
 @review_dialog_router.callback_query(RestaurantReview.cleanliness_rating)
 async def process_cleanliness_rating(callback: types.CallbackQuery, state: FSMContext):
-    if callback.data in ['bad', 'not_good', 'good', 'perfect', 'amazing']:
-        food_rating = callback.data
-        if food_rating in ['bad', 'not_good']:
-            await callback.message.answer("Сожалеем, что вам не понравилась чистота нашего заведения.")
-        elif food_rating == 'good':
-            await callback.message.answer("Будем стараться сделать наше заведение чище.")
-        elif food_rating in ['perfect', 'amazing']:
-            await callback.message.answer("Очень рады, что вам понравилась чистота нашего заведения.")
-        await state.update_data(cleanliness_rating=callback.data)
-        await callback.message.answer("Дополнительные комментарии/жалоба")
-        await state.set_state(RestaurantReview.extra_comments)
+    rating = None
+    if callback.data == 'bad':
+        rating = 2
+    elif callback.data == 'not_good':
+        rating = 3
+    elif callback.data == 'good':
+        rating = 4
+    elif callback.data == 'perfect':
+        rating = 5
+    elif callback.data == 'amazing':
+        rating = 5
+
+    await state.update_data(cleanliness_rating=rating)
+
+    if callback.data in ['bad', 'not_good']:
+        await callback.message.answer("Сожалеем, что вам не понравилась чистота нашего заведения.")
+    elif callback.data == 'good':
+        await callback.message.answer("Будем стараться сделать наше заведение чище.")
+    elif callback.data in ['perfect', 'amazing']:
+        await callback.message.answer("Очень рады, что вам понравилась чистота нашего заведения.")
+
+    await callback.message.answer("Дополнительные комментарии/жалоба")
+    await state.set_state(RestaurantReview.extra_comments)
 
 @review_dialog_router.message(RestaurantReview.extra_comments)
 async def process_extra_comments(message: types.Message,state: FSMContext):
