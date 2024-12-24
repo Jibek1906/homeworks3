@@ -10,6 +10,7 @@ from handlers.description_of_drinks import description_router
 from handlers.random import random_router
 from handlers.review_dialog import review_dialog_router
 from handlers.dishes_manager import admin_router
+from handlers.dishes import dishes_router
 
 async def on_startup(bot):
     database.create_tables()
@@ -23,6 +24,7 @@ async def main():
     dp.include_router(review_dialog_router)
     dp.startup.register(on_startup)
     dp.include_router(admin_router)
+    dp.include_router(dishes_router)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

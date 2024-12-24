@@ -49,3 +49,10 @@ class Database:
             (data["name"], data["price"], data["description"], data["category"], data["kitchen_type"], data["weight_unit"], data["weight"])
             )
             conn.commit()
+
+    def get_dishes(self):
+        with sqlite3.connect(self.path) as conn:
+            result = conn.execute(
+                "SELECT * FROM dishes"
+            )
+            return result.fetchall()
