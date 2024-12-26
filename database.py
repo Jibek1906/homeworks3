@@ -15,19 +15,20 @@ class Database:
                      cleanliness_rating INTEGER,
                      extra_comments TEXT,
                      date DATE 
-                     )
+                 )
             """)
             conn.execute("""
                  CREATE TABLE IF NOT EXISTS dishes (
                      id INTEGER PRIMARY KEY AUTOINCREMENT,
                      name TEXT,
+                     dish_photo TEXT,
                      price FLOAT,
                      description TEXT,
                      category TEXT,
                      kitchen_type TEXT,
                      weight_unit TEXT,
                      weight INTEGER
-                     )
+                 )
             """)
             conn.commit()
 
@@ -37,17 +38,31 @@ class Database:
                  INSERT INTO reviews(name, phone_number, food_rating, cleanliness_rating, extra_comments, date)
                  VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (data["name"], data["phone_number"], data["food_rating"], data["cleanliness_rating"], data["extra_comments"], data["date"] )
-            )
+            (
+                data["name"],
+                data["phone_number"],
+                data["food_rating"],
+                data["cleanliness_rating"],
+                data["extra_comments"],
+                data["date"]
+            ))
             conn.commit()
 
     def save_dishes(self, data: dict):
         with sqlite3.connect(self.path) as conn:
             conn.execute("""
-            INSERT INTO dishes(name, price, description, category, kitchen_type, weight_unit, weight)
-            VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (data["name"], data["price"], data["description"], data["category"], data["kitchen_type"], data["weight_unit"], data["weight"])
-            )
+            INSERT INTO dishes(name, dish_photo, price, description, category, kitchen_type, weight_unit, weight)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                data["name"],
+                data["dish_photo"],
+                data["price"],
+                data["description"],
+                data["category"],
+                data["kitchen_type"],
+                data["weight_unit"],
+                data["weight"]
+            ))
             conn.commit()
 
     def get_dishes(self):

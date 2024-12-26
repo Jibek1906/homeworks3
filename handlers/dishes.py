@@ -11,12 +11,14 @@ async def see_all_dishes(message: types.Message):
         await message.answer("Нет блюд в базе данных")
         return
 
-    dishes_text = "\n".join(
-        [f"{dish[0]}. {dish[1]} "
-         f"\nВес: {dish[2]} {dish[6]} "
-         f"\nОписание: {dish[3]},"
-         f"\nКатегория: {dish[4]}, "
-         f"\nПринадлежит кухне: {dish[5]}" for dish in dishes]
-    )
-    await message.answer(dishes_text)
+    for dish in dishes:
+        photo = dish[2]
+        dish_text = (f"Блюдо: {dish[1]} "
+                     f"\nЦена: {dish[3]} сом"
+                     f"\nВес: {dish[8]} {dish[7]} "
+                     f"\nОписание: {dish[4]} "
+                     f"\nКатегория: {dish[5]} "
+                     f"\nПринадлежит кухне: {dish[6]}")
+        await message.answer_photo(photo=photo, caption=dish_text)
+
 

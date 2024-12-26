@@ -1,10 +1,11 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.state import StatesGroup, State, default_state
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from bot_config import database
+from pprint import pprint
 
 admin_router = Router()
 admin_router.message.filter(F.from_user.id == 661832598)
@@ -12,6 +13,7 @@ admin_router.callback_query.filter(F.from_user.id == 661832598)
 
 class DishAdding(StatesGroup):
     name = State()
+    dish_photo = State()
     price = State()
     description = State()
     category = State()
@@ -19,8 +21,16 @@ class DishAdding(StatesGroup):
     weight_unit = State()
     weight = State()
 
-@admin_router.message(Command("new_dish"))
+@admin_router.message(Command("stop"))
+@admin_router.message(F.text == "стоп")
+async def stop(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Вы вышли из диалога")
+
+
+@admin_router.message(Command("new_dish"), default_state)
 async def start(message: types.Message, state: FSMContext):
+    await message.answer("Если хотите выйти из диалога введите слово 'стоп'")
     await message.answer("Название блюда или напитка:")
     await state.set_state(DishAdding.name)
 
@@ -31,6 +41,16 @@ async def dish_name(message: types.Message, state: FSMContext):
         await message.answer("Вводите название буквами")
         return
     await state.update_data(name=message.text)
+    await message.answer("Загрузите фото блюда")
+    await state.set_state(DishAdding.dish_photo)
+
+@admin_router.message(DishAdding.dish_photo, F.photo)
+async def dish_photo_process(message: types.Message, state: FSMContext):
+    dish_photo = message.photo
+    pprint(dish_photo)
+    biggest_photo = dish_photo[-1]
+    biggest_photo_id = biggest_photo.file_id
+    await state.update_data(dish_photo=biggest_photo_id)
     await message.answer("Цена:")
     await state.set_state(DishAdding.price)
 
@@ -111,8 +131,8 @@ async def dish_kitchen_type(message: types.Message, state: FSMContext):
     weight_kb = types.InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                types.InlineKeyboardButton(text='граммы', callback_data='gram'),
-                types.InlineKeyboardButton(text='литры', callback_data='litres'),
+                types.InlineKeyboardButton(text='граммы', callback_data='грамм'),
+                types.InlineKeyboardButton(text='литры', callback_data='литров'),
             ]
         ]
     )
@@ -134,7 +154,7 @@ async def dish_weight(message: types.Message, state: FSMContext):
         return
     await state.update_data(weight=weight)
     data = await state.get_data()
-    if data['weight_unit'] == "gram":
+    if data['weight_unit'] == "грамм":
         unit = "граммов"
     else:
         unit = "литров"
